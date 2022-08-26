@@ -7,7 +7,7 @@ https://github.com/DronaAviation/Magis
 *From the Window tab, set the perspective to 'C/C++'
 *Right-click on the project in the project explorer, choose 'New -> Convert to C/C++ Project'
 *In Project options, select 'Makefile project -> ARM Cross GCC'
-*Go to Project Properties and select 'C/C++ Build'. Then change Atchitecture to 'ARM64(AArch64)'
+*Go to Project Properties and select 'C/C++ Build'. Then change Architecture to 'ARM64(AArch64)'
 
 After this, the firmware can be customised as per the requirements.
 
