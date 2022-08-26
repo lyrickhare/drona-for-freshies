@@ -1,0 +1,14 @@
+AUV-IITB - Project Drona
+
+*The source code for the PrimusX can be found at the following GitHub repo
+https://github.com/DronaAviation/Magis
+
+*Open the project from the filesystem (option available under 'File' tab)
+*From the Window tab, set the perspective to 'C/C++'
+*Right-click on the project in the project explorer, choose 'New -> Convert to C/C++ Project'
+*In Project options, select 'Makefile project -> ARM Cross GCC'
+*Go to Project Properties and select 'C/C++ Build'. Then change Atchitecture to 'ARM64(AArch64)'
+
+After this, the firmware can be customised as per the requirements.
+
+The custom firmware can be built using the 'Build' button. The .hex firmware file will be saved in the 'obj' subfolder of the project folder.
