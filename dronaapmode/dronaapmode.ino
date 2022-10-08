@@ -27,6 +27,14 @@ String ascendState = "off";
 String descendState = "off";
 String stableState = "on";
 
+uint8_t forward = 99;
+uint8_t back = 100;
+uint8_t yawleft = 97;
+uint8_t yawright = 98;
+uint8_t ascend = 103;
+uint8_t descend = 101;
+uint8_t stable = 102;
+
 
 void setup() {
   SerialPort.begin(9600, SERIAL_8N1, 16, 17);
@@ -72,7 +80,7 @@ void loop(){
               ascendState = "off";
               descendState = "off";
               stableState = "off";
-              SerialPort.print('c');
+              SerialPort.print(forward);
               
             }
             else if(header.indexOf("GET /forward/off") >= 0)
@@ -84,7 +92,7 @@ void loop(){
               ascendState = "off";
               descendState = "off";
               stableState = "on"; 
-              SerialPort.print('f'); 
+              SerialPort.print(stable); 
             }
             else if(header.indexOf("GET /reverse/on") >= 0)
             { 
@@ -95,7 +103,7 @@ void loop(){
               ascendState = "off";
               descendState = "off";
               stableState = "off";
-              SerialPort.print('d');  
+              SerialPort.print(back);  
             }
             else if(header.indexOf("GET /reverse/off") >= 0)
             {
@@ -106,7 +114,7 @@ void loop(){
               ascendState = "off";
               descendState = "off";
               stableState = "on";
-              SerialPort.print('f');  
+              SerialPort.print(stable);  
             }
             else if(header.indexOf("GET /yawleft/on") >= 0)
             {
@@ -117,7 +125,7 @@ void loop(){
               ascendState = "off";
               descendState = "off";
               stableState = "off";
-              SerialPort.print('a');  
+              SerialPort.print(yawleft);  
             }
             else if(header.indexOf("GET /yawleft/off") >= 0)
             {
@@ -128,7 +136,7 @@ void loop(){
               ascendState = "off";
               descendState = "off";
               stableState = "on"; 
-              SerialPort.print('f'); 
+              SerialPort.print(stable); 
             }
             else if(header.indexOf("GET /yawright/on") >= 0)
             {
@@ -139,7 +147,7 @@ void loop(){
               ascendState = "off";
               descendState = "off";
               stableState = "off";
-              SerialPort.print('b');  
+              SerialPort.print(yawright);  
             }
             else if(header.indexOf("GET /yawright/off") >= 0)
             {
@@ -150,7 +158,7 @@ void loop(){
               ascendState = "off";
               descendState = "off";
               stableState = "on";
-              SerialPort.print('f');  
+              SerialPort.print(stable);  
             }
             else if(header.indexOf("GET /ascend/on") >= 0)
             {
@@ -161,7 +169,7 @@ void loop(){
               ascendState = "on";
               descendState = "off";
               stableState = "off";
-              SerialPort.print('g');  
+              SerialPort.print(ascend);  
             }
             else if(header.indexOf("GET /ascend/off") >= 0)
             {
@@ -172,7 +180,7 @@ void loop(){
               ascendState = "off";
               descendState = "off";
               stableState = "on"; 
-              SerialPort.print('f'); 
+              SerialPort.print(stable); 
             }
             else if(header.indexOf("GET /descend/on") >= 0)
             {
@@ -183,7 +191,7 @@ void loop(){
               ascendState = "off";
               descendState = "on";
               stableState = "off";
-              SerialPort.print('e');  
+              SerialPort.print(descend);  
             }
             else if(header.indexOf("GET /descend/off") >= 0)
             {
@@ -194,7 +202,7 @@ void loop(){
               ascendState = "off";
               descendState = "off";
               stableState = "on";
-              SerialPort.print('f');  
+              SerialPort.print(stable);  
             }
             else if(header.indexOf("GET /stable/on") >= 0)
             {
@@ -205,7 +213,7 @@ void loop(){
               ascendState = "off";
               descendState = "off";
               stableState = "on";
-              SerialPort.print('f');  
+              SerialPort.print(stable);  
             }
                         
             // Display the HTML web page
@@ -215,77 +223,74 @@ void loop(){
             // CSS to style the on/off buttons 
             // Feel free to change the background-color and font-size attributes to fit your preferences
             client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
-            client.println(".button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px;");
+            client.println(".button { background-color: #555555; border: none; color: white; padding: 16px 40px;");
             client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
-            client.println(".button2 {background-color: #555555;}</style></head>");
+            client.println(".button2 {background-color: #4CAF50;}</style></head>");
             
             // Web Page Heading
             client.println("<body><h1>Drona Control</h1>");
-            
-
-
-            // Display current state, and ON/OFF buttons for forward  
-            client.println("<p>Forward - State " + forwardState + "</p>");
-            // If the forwardState is off, it displays the ON button       
-            if (forwardState=="off") {
-              client.println("<p><a href=\"/forward/on\"><button class=\"button\">ON</button></a></p>");
-            } else {
-              client.println("<p><a href=\"/forward/off\"><button class=\"button button2\">OFF</button></a></p>");
-            }
-
-            // Display current state, and ON/OFF buttons for reverse  
-            client.println("<p>Reverse - State " + reverseState + "</p>");
-            // If the forwardState is off, it displays the ON button       
-            if (reverseState=="off") {
-              client.println("<p><a href=\"/reverse/on\"><button class=\"button\">ON</button></a></p>");
-            } else {
-              client.println("<p><a href=\"/reverse/off\"><button class=\"button button2\">OFF</button></a></p>");
-            }
-
-            // Display current state, and ON/OFF buttons for yawleft  
-            client.println("<p>Yaw left - State " + yawleftState + "</p>");
+                        
+                        // Display current state, and ON/OFF buttons for yawleft  
             // If the yawleftState is off, it displays the ON button       
             if (yawleftState=="off") {
-              client.println("<p><a href=\"/yawleft/on\"><button class=\"button\">ON</button></a></p>");
+              client.println("<a href=\"/yawleft/on\"><button class=\"button\">YAW LEFT</button></a>");
             } else {
-              client.println("<p><a href=\"/yawleft/off\"><button class=\"button button2\">OFF</button></a></p>");
+              client.println("<a href=\"/yawleft/off\"><button class=\"button button2\">YAW LEFT</button></a>");
             } 
+           
+            
+            // Display current state, and ON/OFF buttons for forward  
+            // If the forwardState is off, it displays the ON button       
+            if (forwardState=="off") {
+              client.println("<a href=\"/forward/on\"><button class=\"button\">FORWARD</button></a>");
+            } else {
+              client.println("<a href=\"/forward/off\"><button class=\"button button2\">FORWARD</button></a>");
+            }
+
+
 
             // Display current state, and ON/OFF buttons for yawright  
-            client.println("<p>Yaw right - State " + yawrightState + "</p>");
             // If the yawrightState is off, it displays the ON button       
             if (yawrightState=="off") {
-              client.println("<p><a href=\"/yawright/on\"><button class=\"button\">ON</button></a></p>");
+              client.println("<a href=\"/yawright/on\"><button class=\"button\">YAW RIGHT</button></a>");
             } else {
-              client.println("<p><a href=\"/yawright/off\"><button class=\"button button2\">OFF</button></a></p>");
+              client.println("<a href=\"/yawright/off\"><button class=\"button button2\">YAW RIGHT</button></a>");
             }
 
+
+            // Display current state, and ON/OFF buttons for reverse  
+            // If the forwardState is off, it displays the ON button       
+            if (reverseState=="off") {
+              client.println("<p><a href=\"/reverse/on\"><button class=\"button\">REVERSE</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/reverse/off\"><button class=\"button button2\">REVERSE</button></a></p>");
+            }
+            
             // Display current state, and ON/OFF buttons for ascend  
-            client.println("<p>Ascend - State " + ascendState + "</p>");
             // If the ascendState is off, it displays the ON button       
             if (ascendState=="off") {
-              client.println("<p><a href=\"/ascend/on\"><button class=\"button\">ON</button></a></p>");
+              client.println("<a href=\"/ascend/on\"><button class=\"button\">ASCEND</button></a>");
             } else {
-              client.println("<p><a href=\"/ascend/off\"><button class=\"button button2\">OFF</button></a></p>");
+              client.println("<a href=\"/ascend/off\"><button class=\"button button2\">ASCEND</button></a>");
             }
-           
-            // Display current state, and ON/OFF buttons for descend  
-            client.println("<p>Descend - State " + descendState + "</p>");
-            // If the descendState is off, it displays the ON button       
-            if (descendState=="off") {
-              client.println("<p><a href=\"/descend/on\"><button class=\"button\">ON</button></a></p>");
-            } else {
-              client.println("<p><a href=\"/descend/off\"><button class=\"button button2\">OFF</button></a></p>");
-            }
-
+            
             // Display current state, and ON/OFF buttons for stable  
-            client.println("<p>Stable - State " + stableState + "</p>");
             // If the stableState is off, it displays the ON button       
             if (stableState=="off") {
-              client.println("<p><a href=\"/stable/on\"><button class=\"button\">ON</button></a></p>");
+              client.println("<a href=\"/stable/on\"><button class=\"button\">STABILIZE</button></a>");
             } else {
-              client.println("<p><a href=\"/stable/off\"><button class=\"button button2\">OFF</button></a></p>");
+              client.println("<a href=\"/stable/off\"><button class=\"button button2\">STABILIZE</button></a>");
+            }           
+            
+            // Display current state, and ON/OFF buttons for descend  
+            // If the descendState is off, it displays the ON button       
+            if (descendState=="off") {
+              client.println("<a href=\"/descend/on\"><button class=\"button\">DESCEND</button></a>");
+            } else {
+              client.println("<a href=\"/descend/off\"><button class=\"button button2\">DESCEND</button></a>");
             }
+
+
             client.println("</body></html>");
             
             // The HTTP response ends with another blank line
