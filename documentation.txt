@@ -1,0 +1,17 @@
+* Getting UART working on the PrimusX
+
+Initialise UART2 to use the UART interface on the PrimusX Breakout Board
+
+Always read UART data in an if statement with the condition set to the return value of the function rxBytesWaiting() in the UART class *V_IMP*
+
+Similarly, write UART data in an if statement with the condition set to the return value of the function txBytesFree()
+
+The characters corresponding to each command must NOT be stored in a variable on the .ino file flashed on the ESP32 WiFi module. Print the character directly. e.g use SerialPort.print('c') instead of, say using SerialPort.print(forward) where forward = 'c'
+
+* Some general observations
+
+Run Arduino as sudo on Linux to be able to burn .ino files onto the ESP32, or any other board for that matter
+
+Cygnus IDE on Linux requires JDK 8 to be installed. However, projects flashed using it don't seem to work as reliably as the ones flashed using the Windows version. So please avoid
+
+Use Drona Controller on Android as it is updated more often and works more reliably than the iOS version
