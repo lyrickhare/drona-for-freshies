@@ -15,3 +15,27 @@ Run Arduino as sudo on Linux to be able to burn .ino files onto the ESP32, or an
 Cygnus IDE on Linux requires JDK 8 to be installed. However, projects flashed using it don't seem to work as reliably as the ones flashed using the Windows version. So please avoid
 
 Use Pluto Controller on Android as it is updated more often and works more reliably than the iOS version
+
+*Code description (PD action for YAW stability)
+
+		yaw = Angle.get(AG_YAW);    \\Obtain current yaw angle
+		yaw_err = yaw - yaw0;       \\Compare with yaw angle determined at the beginning of the loop
+		yaw_diff = Rate.get(Z);     \\Measure rate of change of yaw angle
+		pwm_yaw = yaw_kp * yaw_err + yaw_kd * yaw_diff;       \\PD equation, yaw_kp and yaw_kd are to be set while performing controller tuning
+
+		if(pwm_yaw >= 0)                                      \\if-else statement to bring pwm values to necessary range and to set motors to correct direction
+		{                                                     \\additional code can be added to limit pwm_yaw to 2000 if kp and kd can't be set in a certain planned way
+			pwm_yaw = pwm_yaw + 1000;
+			Motor.setDirection(M1, CLOCK_WISE);
+			Motor.setDirection(M2, ANTICLOCK_WISE);
+		}
+		else
+		{
+			pwm_yaw = -pwm_yaw + 1000;
+			Motor.setDirection(M1, ANTICLOCK_WISE);
+			Motor.setDirection(M2, CLOCK_WISE);
+		}
+
+		Motor.set(M1, pwm_yaw);                                \\setting motors to the required pwm values
+		Motor.set(M2, pwm_yaw);
+
