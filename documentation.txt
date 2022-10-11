@@ -14,4 +14,4 @@ Run Arduino as sudo on Linux to be able to burn .ino files onto the ESP32, or an
 
 Cygnus IDE on Linux requires JDK 8 to be installed. However, projects flashed using it don't seem to work as reliably as the ones flashed using the Windows version. So please avoid
 
-Use Drona Controller on Android as it is updated more often and works more reliably than the iOS version
+Use Pluto Controller on Android as it is updated more often and works more reliably than the iOS version
