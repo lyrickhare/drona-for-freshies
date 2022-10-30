@@ -7,7 +7,7 @@
 #include "Motor.h"
 #include "Peripheral.h"
 
-int16_t pwm_yaw, yaw, yaw0, yaw_err, yaw_diff, yaw_kd, yaw_kp, pwm_heave, z, z0, z_err, z_diff, z_kd, z_kp; //PD variables
+int16_t pwm_yaw, yaw, yaw0, yaw_err, yaw_diff, yaw_kd, yaw_kp, pwm_heave, z, z0, z_err, z_diff, z_kd, z_kp, pwm_pitch, pitch, pitch_diff, pitch_kd, pitch_kp, pwm_roll, roll, roll_diff, roll_kd, roll_kp; //PD variables
 uint8_t message; //UART Message
 bool uart_status;
 
@@ -63,16 +63,34 @@ void plutoLoop()
 	}
 	if(message == 'f')   //stable
 	{
-		yaw = Angle.get(AG_YAW);
-		yaw_err = yaw - yaw0;
-		yaw_diff = Rate.get(Z);
-		pwm_yaw = yaw_kp * yaw_err + yaw_kd * yaw_diff;
+		pitch = Angle.get(AG_PITCH);
+		pitch_diff = Rate.get(Y);
+		pwm_pitch = pitch_kp * pitch + pitch_kd * pitch_diff;
+		if(pwm_pitch > 0)
+		{
+			Motor.setDirection(M1, ANTICLOCK_WISE);
+			Motor.setDirection(M2, CLOCK_WISE);
+			pwm_pitch = pwm_pitch + 1000;
+		}
+		else
+		{
+			Motor.setDirection(M1, CLOCK_WISE);
+			Motor.setDirection(M2, ANTICLOCK_WISE);
+			pwm_pitch = -pwm_pitch + 1000;
+		}
 
-		if(pwm_yaw >= 0)
+		Motor.set(M1, pwm_pitch);
+		Motor.set(M2, pwm_pitch);
+
+		yaw = Angle.get(AG_YAW);
+		yaw_diff = Rate.get(Z);
+		yaw_err = yaw - yaw0;
+		pwm_yaw = yaw_kp * yaw_err + yaw_kd * yaw_diff;
+		if(pwm_yaw > 0)
 		{
 			pwm_yaw = pwm_yaw + 1000;
-            Motor.set(M5, pwm_yaw);
-            Motor.set(M6, 1000);
+			Motor.set(M5, pwm_yaw);
+			Motor.set(M6, 1000);
 		}
 		else
 		{
@@ -81,49 +99,109 @@ void plutoLoop()
 			Motor.set(M6, pwm_yaw);
 		}
 
+		roll = Angle.get(AG_ROLL);
+		roll_diff = Rate.get(X);
+		pwm_roll = roll_kp * roll + roll_kd * roll_diff;
 		z = Position.get(Z);
 		z_err = z - z0;
 		z_diff = Velocity.get(Z);
 		pwm_heave = z_kp * z_err + z_kd * z_diff;
-		if(pwm_heave >= 0)
+		if(pwm_heave > 0)
 		{
 			pwm_heave = pwm_heave + 1000;
 			Motor.setDirection(M3, ANTICLOCK_WISE);
 			Motor.setDirection(M4, ANTICLOCK_WISE);
+			if(pwm_roll > 0)
+			{
+				Motor.set(M3, pwm_heave - pwm_roll);
+				Motor.set(M4, pwm_heave + pwm_roll);
+			}
+			else
+			{
+				Motor.set(M3, pwm_heave + pwm_roll);
+				Motor.set(M4, pwm_heave - pwm_roll);
+			}
 		}
 		else
 		{
 			pwm_heave = -pwm_heave + 1000;
 			Motor.setDirection(M3, CLOCK_WISE);
 			Motor.setDirection(M4, CLOCK_WISE);
+			if(pwm_roll > 0)
+			{
+				Motor.set(M3, pwm_heave + pwm_roll);
+				Motor.set(M4, pwm_heave - pwm_roll);
+			}
+			else
+			{
+				Motor.set(M3, pwm_heave - pwm_roll);
+				Motor.set(M4, pwm_heave + pwm_roll);
+			}
 		}
-
-		Motor.set(M3, pwm_heave);
-		Motor.set(M4, pwm_heave);
 
 	}
 
+
 	if(message == 'a') //yaw left
 	{
+		pitch = Angle.get(AG_PITCH);
+		pitch_diff = Rate.get(Y);
+		pwm_pitch = pitch_kp * pitch + pitch_kd * pitch_diff;
+		if(pwm_pitch > 0)
+		{
+			Motor.setDirection(M1, ANTICLOCK_WISE);
+			Motor.setDirection(M2, CLOCK_WISE);
+			pwm_pitch = pwm_pitch + 1000;
+		}
+		else
+		{
+			Motor.setDirection(M1, CLOCK_WISE);
+			Motor.setDirection(M2, ANTICLOCK_WISE);
+			pwm_pitch = -pwm_pitch + 1000;
+		}
+
+		Motor.set(M1, pwm_pitch);
+		Motor.set(M2, pwm_pitch);
+
+		roll = Angle.get(AG_ROLL);
+		roll_diff = Rate.get(X);
+		pwm_roll = roll_kp * roll + roll_kd * roll_diff;
 		z = Position.get(Z);
 		z_err = z - z0;
 		z_diff = Velocity.get(Z);
 		pwm_heave = z_kp * z_err + z_kd * z_diff;
-		if(pwm_heave >= 0)
+		if(pwm_heave > 0)
 		{
 			pwm_heave = pwm_heave + 1000;
 			Motor.setDirection(M3, ANTICLOCK_WISE);
 			Motor.setDirection(M4, ANTICLOCK_WISE);
+			if(pwm_roll > 0)
+			{
+				Motor.set(M3, pwm_heave - pwm_roll);
+				Motor.set(M4, pwm_heave + pwm_roll);
+			}
+			else
+			{
+				Motor.set(M3, pwm_heave + pwm_roll);
+				Motor.set(M4, pwm_heave - pwm_roll);
+			}
 		}
 		else
 		{
 			pwm_heave = -pwm_heave + 1000;
 			Motor.setDirection(M3, CLOCK_WISE);
 			Motor.setDirection(M4, CLOCK_WISE);
+			if(pwm_roll > 0)
+			{
+				Motor.set(M3, pwm_heave + pwm_roll);
+				Motor.set(M4, pwm_heave - pwm_roll);
+			}
+			else
+			{
+				Motor.set(M3, pwm_heave - pwm_roll);
+				Motor.set(M4, pwm_heave + pwm_roll);
+			}
 		}
-
-		Motor.set(M3, pwm_heave);
-		Motor.set(M4, pwm_heave);
 
 		Motor.set(M5, 1500);
 		Motor.set(M6, 1000);
@@ -133,44 +211,81 @@ void plutoLoop()
 
 	if(message == 'b') //yaw right
 	{
+		pitch = Angle.get(AG_PITCH);
+		pitch_diff = Rate.get(Y);
+		pwm_pitch = pitch_kp * pitch + pitch_kd * pitch_diff;
+		if(pwm_pitch > 0)
+		{
+			Motor.setDirection(M1, ANTICLOCK_WISE);
+			Motor.setDirection(M2, CLOCK_WISE);
+			pwm_pitch = pwm_pitch + 1000;
+		}
+		else
+		{
+			Motor.setDirection(M1, CLOCK_WISE);
+			Motor.setDirection(M2, ANTICLOCK_WISE);
+			pwm_pitch = -pwm_pitch + 1000;
+		}
+
+		Motor.set(M1, pwm_pitch);
+		Motor.set(M2, pwm_pitch);
+
+		roll = Angle.get(AG_ROLL);
+		roll_diff = Rate.get(X);
+		pwm_roll = roll_kp * roll + roll_kd * roll_diff;
 		z = Position.get(Z);
 		z_err = z - z0;
 		z_diff = Velocity.get(Z);
 		pwm_heave = z_kp * z_err + z_kd * z_diff;
-		if(pwm_heave >= 0)
+		if(pwm_heave > 0)
 		{
 			pwm_heave = pwm_heave + 1000;
 			Motor.setDirection(M3, ANTICLOCK_WISE);
 			Motor.setDirection(M4, ANTICLOCK_WISE);
+			if(pwm_roll > 0)
+			{
+				Motor.set(M3, pwm_heave - pwm_roll);
+				Motor.set(M4, pwm_heave + pwm_roll);
+			}
+			else
+			{
+				Motor.set(M3, pwm_heave + pwm_roll);
+				Motor.set(M4, pwm_heave - pwm_roll);
+			}
 		}
 		else
 		{
 			pwm_heave = -pwm_heave + 1000;
 			Motor.setDirection(M3, CLOCK_WISE);
 			Motor.setDirection(M4, CLOCK_WISE);
+			if(pwm_roll > 0)
+			{
+				Motor.set(M3, pwm_heave + pwm_roll);
+				Motor.set(M4, pwm_heave - pwm_roll);
+			}
+			else
+			{
+				Motor.set(M3, pwm_heave - pwm_roll);
+				Motor.set(M4, pwm_heave + pwm_roll);
+			}
 		}
-
-		Motor.set(M3, pwm_heave);
-		Motor.set(M4, pwm_heave);
 
 		Motor.set(M5, 1000);
 		Motor.set(M6, 1500);
 		yaw0 = Angle.get(AG_YAW);
-
 	}
 
 	if(message == 'c') //surge forward
 	{
 		yaw = Angle.get(AG_YAW);
-		yaw_err = yaw - yaw0;
 		yaw_diff = Rate.get(Z);
+		yaw_err = yaw - yaw0;
 		pwm_yaw = yaw_kp * yaw_err + yaw_kd * yaw_diff;
-
-		if(pwm_yaw >= 0)
+		if(pwm_yaw > 0)
 		{
 			pwm_yaw = pwm_yaw + 1000;
-            Motor.set(M5, pwm_yaw);
-            Motor.set(M6, 1000);
+			Motor.set(M5, pwm_yaw);
+			Motor.set(M6, 1000);
 		}
 		else
 		{
@@ -179,75 +294,171 @@ void plutoLoop()
 			Motor.set(M6, pwm_yaw);
 		}
 
+		roll = Angle.get(AG_ROLL);
+		roll_diff = Rate.get(X);
+		pwm_roll = roll_kp * roll + roll_kd * roll_diff;
 		z = Position.get(Z);
 		z_err = z - z0;
 		z_diff = Velocity.get(Z);
 		pwm_heave = z_kp * z_err + z_kd * z_diff;
-		if(pwm_heave >= 0)
+		if(pwm_heave > 0)
 		{
 			pwm_heave = pwm_heave + 1000;
 			Motor.setDirection(M3, ANTICLOCK_WISE);
 			Motor.setDirection(M4, ANTICLOCK_WISE);
+			if(pwm_roll > 0)
+			{
+				Motor.set(M3, pwm_heave - pwm_roll);
+				Motor.set(M4, pwm_heave + pwm_roll);
+			}
+			else
+			{
+				Motor.set(M3, pwm_heave + pwm_roll);
+				Motor.set(M4, pwm_heave - pwm_roll);
+			}
 		}
 		else
 		{
 			pwm_heave = -pwm_heave + 1000;
 			Motor.setDirection(M3, CLOCK_WISE);
 			Motor.setDirection(M4, CLOCK_WISE);
+			if(pwm_roll > 0)
+			{
+				Motor.set(M3, pwm_heave + pwm_roll);
+				Motor.set(M4, pwm_heave - pwm_roll);
+			}
+			else
+			{
+				Motor.set(M3, pwm_heave - pwm_roll);
+				Motor.set(M4, pwm_heave + pwm_roll);
+			}
 		}
 
-		Motor.set(M3, pwm_heave);
-		Motor.set(M4, pwm_heave);
-
+		pitch = Angle.get(AG_PITCH);
+		pitch_diff = Rate.get(Y);
+		pwm_pitch = pitch_kp * pitch + pitch_kd * pitch_diff;
 		Motor.setDirection(M1, CLOCK_WISE);
 		Motor.setDirection(M2, CLOCK_WISE);
-		Motor.set(M1, 2000);
-		Motor.set(M2, 2000);
+		if(pwm_pitch > 0)
+		{
+			Motor.set(M1, 1600 - pwm_pitch);
+			Motor.set(M2, 1600 + pwm_pitch);
+		}
+		else
+		{
+			Motor.set(M1, 1600 + pwm_pitch);
+			Motor.set(M2, 1600 - pwm_pitch);
+		}
 
 	}
 
 	if(message == 'd')  //surge back
 	{
+		yaw = Angle.get(AG_YAW);
+		yaw_diff = Rate.get(Z);
+		yaw_err = yaw - yaw0;
+		pwm_yaw = yaw_kp * yaw_err + yaw_kd * yaw_diff;
+		if(pwm_yaw > 0)
+		{
+			pwm_yaw = pwm_yaw + 1000;
+			Motor.set(M5, pwm_yaw);
+			Motor.set(M6, 1000);
+		}
+		else
+		{
+			pwm_yaw = -pwm_yaw + 1000;
+			Motor.set(M5, 1000);
+			Motor.set(M6, pwm_yaw);
+		}
+
+		roll = Angle.get(AG_ROLL);
+		roll_diff = Rate.get(X);
+		pwm_roll = roll_kp * roll + roll_kd * roll_diff;
 		z = Position.get(Z);
 		z_err = z - z0;
 		z_diff = Velocity.get(Z);
 		pwm_heave = z_kp * z_err + z_kd * z_diff;
-		if(pwm_heave >= 0)
+		if(pwm_heave > 0)
 		{
 			pwm_heave = pwm_heave + 1000;
 			Motor.setDirection(M3, ANTICLOCK_WISE);
 			Motor.setDirection(M4, ANTICLOCK_WISE);
+			if(pwm_roll > 0)
+			{
+				Motor.set(M3, pwm_heave - pwm_roll);
+				Motor.set(M4, pwm_heave + pwm_roll);
+			}
+			else
+			{
+				Motor.set(M3, pwm_heave + pwm_roll);
+				Motor.set(M4, pwm_heave - pwm_roll);
+			}
 		}
 		else
 		{
 			pwm_heave = -pwm_heave + 1000;
 			Motor.setDirection(M3, CLOCK_WISE);
 			Motor.setDirection(M4, CLOCK_WISE);
+			if(pwm_roll > 0)
+			{
+				Motor.set(M3, pwm_heave + pwm_roll);
+				Motor.set(M4, pwm_heave - pwm_roll);
+			}
+			else
+			{
+				Motor.set(M3, pwm_heave - pwm_roll);
+				Motor.set(M4, pwm_heave + pwm_roll);
+			}
 		}
 
-		Motor.set(M3, pwm_heave);
-		Motor.set(M4, pwm_heave);
-
+		pitch = Angle.get(AG_PITCH);
+		pitch_diff = Rate.get(Y);
+		pwm_pitch = pitch_kp * pitch + pitch_kd * pitch_diff;
 		Motor.setDirection(M1, ANTICLOCK_WISE);
 		Motor.setDirection(M2, ANTICLOCK_WISE);
-		Motor.set(M1, 2000);
-		Motor.set(M2, 2000);
+		if(pwm_pitch > 0)
+		{
+			Motor.set(M1, 1600 + pwm_pitch);
+			Motor.set(M2, 1600 - pwm_pitch);
+		}
+		else
+		{
+			Motor.set(M1, 1600 - pwm_pitch);
+			Motor.set(M2, 1600 + pwm_pitch);
+		}
 
 	}
 
 	if(message == 'e') //descend
 	{
+		pitch = Angle.get(AG_PITCH);
+		pitch_diff = Rate.get(Y);
+		pwm_pitch = pitch_kp * pitch + pitch_kd * pitch_diff;
+		if(pwm_pitch > 0)
+		{
+			Motor.setDirection(M1, ANTICLOCK_WISE);
+			Motor.setDirection(M2, CLOCK_WISE);
+			pwm_pitch = pwm_pitch + 1000;
+		}
+		else
+		{
+			Motor.setDirection(M1, CLOCK_WISE);
+			Motor.setDirection(M2, ANTICLOCK_WISE);
+			pwm_pitch = -pwm_pitch + 1000;
+		}
+
+		Motor.set(M1, pwm_pitch);
+		Motor.set(M2, pwm_pitch);
 
 		yaw = Angle.get(AG_YAW);
-		yaw_err = yaw - yaw0;
 		yaw_diff = Rate.get(Z);
+		yaw_err = yaw - yaw0;
 		pwm_yaw = yaw_kp * yaw_err + yaw_kd * yaw_diff;
-
-		if(pwm_yaw >= 0)
+		if(pwm_yaw > 0)
 		{
 			pwm_yaw = pwm_yaw + 1000;
-            Motor.set(M5, pwm_yaw);
-            Motor.set(M6, 1000);
+			Motor.set(M5, pwm_yaw);
+			Motor.set(M6, 1000);
 		}
 		else
 		{
@@ -256,25 +467,54 @@ void plutoLoop()
 			Motor.set(M6, pwm_yaw);
 		}
 
-		Motor.setDirection(M3, CLOCK_WISE);
-		Motor.setDirection(M4, CLOCK_WISE);
-		Motor.set(M3, 1500);
-		Motor.set(M4, 1500);
+		roll = Angle.get(AG_ROLL);
+		roll_diff = Rate.get(X);
+		pwm_roll = roll_kp * roll + roll_kd * roll_diff;
+		Motor.setDirection(M3, ANTICLOCK_WISE);
+		Motor.setDirection(M4, ANTICLOCK_WISE);
+		if(pwm_roll > 0)
+		{
+			Motor.set(M3, 1600 - pwm_roll);
+			Motor.set(M4, 1600 + pwm_roll);
+		}
+		else
+		{
+			Motor.set(M3, 1600 + pwm_roll);
+			Motor.set(M4, 1600 - pwm_roll);
+		}
 		z0 = Position.get(Z);
 	}
 
 	if(message == 'g') //ascend
 	{
-		yaw = Angle.get(AG_YAW);
-		yaw_err = yaw - yaw0;
-		yaw_diff = Rate.get(Z);
-		pwm_yaw = yaw_kp * yaw_err + yaw_kd * yaw_diff;
+		pitch = Angle.get(AG_PITCH);
+		pitch_diff = Rate.get(Y);
+		pwm_pitch = pitch_kp * pitch + pitch_kd * pitch_diff;
+		if(pwm_pitch > 0)
+		{
+			Motor.setDirection(M1, ANTICLOCK_WISE);
+			Motor.setDirection(M2, CLOCK_WISE);
+			pwm_pitch = pwm_pitch + 1000;
+		}
+		else
+		{
+			Motor.setDirection(M1, CLOCK_WISE);
+			Motor.setDirection(M2, ANTICLOCK_WISE);
+			pwm_pitch = -pwm_pitch + 1000;
+		}
 
-		if(pwm_yaw >= 0)
+		Motor.set(M1, pwm_pitch);
+		Motor.set(M2, pwm_pitch);
+
+		yaw = Angle.get(AG_YAW);
+		yaw_diff = Rate.get(Z);
+		yaw_err = yaw - yaw0;
+		pwm_yaw = yaw_kp * yaw_err + yaw_kd * yaw_diff;
+		if(pwm_yaw > 0)
 		{
 			pwm_yaw = pwm_yaw + 1000;
-            Motor.set(M5, pwm_yaw);
-            Motor.set(M6, 1000);
+			Motor.set(M5, pwm_yaw);
+			Motor.set(M6, 1000);
 		}
 		else
 		{
@@ -283,10 +523,21 @@ void plutoLoop()
 			Motor.set(M6, pwm_yaw);
 		}
 
-		Motor.setDirection(M1, ANTICLOCK_WISE);
-		Motor.setDirection(M2, ANTICLOCK_WISE);
-		Motor.set(M1, 1500);
-		Motor.set(M2, 1500);
+		roll = Angle.get(AG_ROLL);
+		roll_diff = Rate.get(X);
+		pwm_roll = roll_kp * roll + roll_kd * roll_diff;
+		Motor.setDirection(M3, CLOCK_WISE);
+		Motor.setDirection(M4, CLOCK_WISE);
+		if(pwm_roll > 0)
+		{
+			Motor.set(M3, 1600 + pwm_roll);
+			Motor.set(M4, 1600 - pwm_roll);
+		}
+		else
+		{
+			Motor.set(M3, 1600 - pwm_roll);
+			Motor.set(M4, 1600 + pwm_roll);
+		}
 		z0 = Position.get(Z);
 	}
 
